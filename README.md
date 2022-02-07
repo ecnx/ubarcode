@@ -18,3 +18,5 @@ program options:
 
 supported barcode: code128 code39 codabar code93
 ```
+
+Dependencies: libpng
