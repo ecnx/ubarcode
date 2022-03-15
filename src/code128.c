@@ -22,7 +22,7 @@ enum code128_subtype_t
 static const char *dictionary[][4] = {
     {" ", " ", "00", "212222"},
     {"!", "!", "01", "222122"},
-    {"" ", " "", "02", "222221"},
+    {"\"", "\"", "02", "222221"},
     {"#", "#", "03", "121223"},
     {"$", "$", "04", "121322"},
     {"%", "%", "05", "131222"},
@@ -254,29 +254,21 @@ static int encode_input ( const char *input, struct byte_array_t *array )
             subtype_backup = CODE128_UNKNOWN;
         }
 
-        if ( streq_plus ( ptr, "Start A" ) || streq_plus ( ptr, "Code A" ) )
+        if ( streq_plus ( ptr, "Start A" ) )
         {
             switch_encoding ( &subtype, CODE128_A );
 
-        } else if ( streq_plus ( ptr, "Start B" ) || streq_plus ( ptr, "Code B" ) )
+        } else if ( streq_plus ( ptr, "Start B" ) )
         {
             switch_encoding ( &subtype, CODE128_B );
 
-        } else if ( streq_plus ( ptr, "Start C" ) || streq_plus ( ptr, "Code C" ) )
+        } else if ( streq_plus ( ptr, "Start C" ) )
         {
             switch_encoding ( &subtype, CODE128_C );
 
-        } else if ( streq_plus ( ptr, "Shift B" ) )
-        {
-            subtype_backup = CODE128_A;
-            switch_encoding ( &subtype, CODE128_B );
-
-        } else if ( streq_plus ( ptr, "Shift A" ) )
-        {
-            subtype_backup = CODE128_B;
-            switch_encoding ( &subtype, CODE128_A );
-
-        } else if ( subtype == CODE128_C )
+        } else if ( subtype == CODE128_C && !streq_plus ( ptr, "Code A" ) &&
+            !streq_plus ( ptr, "Code B" ) && !streq_plus ( ptr, "Code C" ) &&
+            !streq_plus ( ptr, "Shift A" ) && !streq_plus ( ptr, "Shift B" ) )
         {
             if ( !streq_plus ( ptr, "FNC 1" ) && !streq_plus ( ptr, "Stop" ) )
             {
@@ -339,6 +331,29 @@ static int encode_input ( const char *input, struct byte_array_t *array )
         } else
         {
             checksum = index;
+        }
+
+        if ( streq_plus ( ptr, "Code A" ) )
+        {
+            switch_encoding ( &subtype, CODE128_A );
+
+        } else if ( streq_plus ( ptr, "Code B" ) )
+        {
+            switch_encoding ( &subtype, CODE128_B );
+
+        } else if ( streq_plus ( ptr, "Code C" ) )
+        {
+            switch_encoding ( &subtype, CODE128_C );
+
+        } else if ( streq_plus ( ptr, "Shift B" ) )
+        {
+            subtype_backup = CODE128_A;
+            switch_encoding ( &subtype, CODE128_B );
+
+        } else if ( streq_plus ( ptr, "Shift A" ) )
+        {
+            subtype_backup = CODE128_B;
+            switch_encoding ( &subtype, CODE128_A );
         }
 
         input_symbol_next ( &ptr );
